@@ -2,6 +2,7 @@ package com.bus.bus.model;
 
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
@@ -21,9 +22,12 @@ public class userm {
     private String email;
     private String password;
     private String role;
+    private String phone;
     @OneToMany(mappedBy = "users",cascade = CascadeType.ALL)
+    @JsonIgnore
     private List<bookingm> booking;
     @OneToMany(mappedBy = "admin",cascade = CascadeType.ALL)
+    @JsonIgnore
     private List<busm> bus;
 
     // Manual getters and setters as fallback for Lombok
@@ -41,6 +45,9 @@ public class userm {
     
     public String getRole() { return role; }
     public void setRole(String role) { this.role = role; }
+    
+    public String getPhone() { return phone; }
+    public void setPhone(String phone) { this.phone = phone; }
     
     public List<bookingm> getBooking() { return booking; }
     public void setBooking(List<bookingm> booking) { this.booking = booking; }

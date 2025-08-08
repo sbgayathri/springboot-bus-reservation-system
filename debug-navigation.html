@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Button Click Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .test-section { margin: 20px 0; padding: 20px; border: 1px solid #ccc; }
+        button { padding: 10px 20px; margin: 10px; background: #007bff; color: white; border: none; cursor: pointer; }
+        button:hover { background: #0056b3; }
+        .log { margin: 10px 0; padding: 10px; background: #f8f9fa; border-left: 3px solid #007bff; font-family: monospace; }
+    </style>
+</head>
+<body>
+    <h1>🔧 Navigation Debug Tool</h1>
+    
+    <div class="test-section">
+        <h2>🚌 Quick Navigation Test</h2>
+        <p>Click these buttons to test direct navigation:</p>
+        
+        <button onclick="testDirectNavigation()">Test Direct Navigation to Booking Page</button>
+        <button onclick="openConsole()">Open Browser Console</button>
+        <button onclick="testCurrentPage()">Check Current Page URL</button>
+        
+        <div id="result" class="log" style="display:none;"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>📋 Step-by-Step Debug Instructions</h2>
+        <ol>
+            <li><strong>Open React App:</strong> Go to <a href="http://localhost:3000" target="_blank">http://localhost:3000</a></li>
+            <li><strong>Login:</strong> Make sure you're logged in as a user</li>
+            <li><strong>Go to Browse Buses:</strong> Navigate to browse buses page</li>
+            <li><strong>Open Console:</strong> Press F12 to open Developer Tools → Console tab</li>
+            <li><strong>Click Book Button:</strong> Click any "Book Now" button</li>
+            <li><strong>Check Console:</strong> Look for these debug messages:
+                <ul>
+                    <li>🖱️ BUTTON CLICKED!!! Bus: [bus data]</li>
+                    <li>🚌 ==== HANDLE BOOK BUS FUNCTION CALLED ====</li>
+                    <li>👤 Current user: [user data]</li>
+                    <li>🚀 Navigation command executed successfully!</li>
+                </ul>
+            </li>
+            <li><strong>Check URL:</strong> URL should change to /buses/user/book/[busId]</li>
+        </ol>
+    </div>
+
+    <div class="test-section">
+        <h2>🎯 Expected Behavior</h2>
+        <p><strong>What should happen:</strong></p>
+        <ul>
+            <li>You click "Book Now" on any bus</li>
+            <li>Console shows debug messages</li>
+            <li>URL changes to: <code>http://localhost:3000/buses/user/book/1</code> (or whatever bus ID)</li>
+            <li>Booking page loads with bus details</li>
+        </ul>
+        
+        <p><strong>If it's not working:</strong></p>
+        <ul>
+            <li>❌ No console messages = Button click not working</li>
+            <li>❌ Console messages but no URL change = Navigation not working</li>
+            <li>❌ URL changes but page doesn't load = Route or component issue</li>
+        </ul>
+    </div>
+
+    <script>
+        function testDirectNavigation() {
+            const result = document.getElementById('result');
+            result.innerHTML = `
+                <h4>Testing Direct Navigation...</h4>
+                <p>Opening booking page directly: <a href="http://localhost:3000/buses/user/book/1" target="_blank">http://localhost:3000/buses/user/book/1</a></p>
+                <p>If this works, the route is correct. If not, there's a route issue.</p>
+            `;
+            result.style.display = 'block';
+            
+            // Also open the page
+            window.open('http://localhost:3000/buses/user/book/1', '_blank');
+        }
+
+        function openConsole() {
+            const result = document.getElementById('result');
+            result.innerHTML = `
+                <h4>Opening Console...</h4>
+                <p>Press <strong>F12</strong> to open Developer Tools</p>
+                <p>Go to the <strong>Console</strong> tab</p>
+                <p>Then go to the React app and try clicking Book Now</p>
+            `;
+            result.style.display = 'block';
+        }
+
+        function testCurrentPage() {
+            const result = document.getElementById('result');
+            result.innerHTML = `
+                <h4>Current Page Info:</h4>
+                <p><strong>URL:</strong> ${window.location.href}</p>
+                <p><strong>User Agent:</strong> ${navigator.userAgent}</p>
+                <p><strong>Time:</strong> ${new Date().toLocaleString()}</p>
+            `;
+            result.style.display = 'block';
+        }
+    </script>
+</body>
+</html>

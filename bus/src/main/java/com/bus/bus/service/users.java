@@ -7,6 +7,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.bus.bus.model.userm;
@@ -19,6 +20,8 @@ public class users {
     private userr userRepository;
     @Autowired
     private ModelMapper  mm;
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     @Bean
     public ModelMapper modelmapper(){
@@ -39,10 +42,26 @@ public class users {
     public ResponseEntity<String> updateprofile(int userid, userm u) {
         Optional<userm> us=userRepository.findById(userid);
         if(us.isPresent()){
-            mm.map(u,us.get());
-            userRepository.save(us.get());
+            userm existingUser = us.get();
+            
+            // Update only the allowed fields
+            if (u.getUsername() != null && !u.getUsername().trim().isEmpty()) {
+                existingUser.setUsername(u.getUsername());
+            }
+            if (u.getEmail() != null && !u.getEmail().trim().isEmpty()) {
+                existingUser.setEmail(u.getEmail());
+            }
+            if (u.getPhone() != null && !u.getPhone().trim().isEmpty()) {
+                existingUser.setPhone(u.getPhone());
+            }
+            if (u.getPassword() != null && !u.getPassword().trim().isEmpty()) {
+                existingUser.setPassword(passwordEncoder.encode(u.getPassword()));
+            }
+            // Don't update role or ID - keep existing values
+            
+            userRepository.save(existingUser);
             return ResponseEntity.ok("Profile updated successfully");
         }
-        return null;
+        return ResponseEntity.badRequest().body("User not found");
     }
 }

@@ -10,6 +10,7 @@ import com.bus.bus.model.userm;
 
 public interface userr extends JpaRepository<userm,Integer>{
        Optional<userm> findByEmail(String email);
+       List<userm> findByRole(String role);
        @Query("SELECT b.users FROM bookingm b WHERE b.bus.id=:busid")
        List<userm> finduserbybusid(int busid);
 }

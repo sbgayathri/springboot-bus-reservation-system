@@ -4,15 +4,12 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.context.annotation.Bean;
 
-import org.modelmapper.ModelMapper;
 import com.bus.bus.model.bookingm;
-import com.bus.bus.model.busm;
 import com.bus.bus.model.userm;
 import com.bus.bus.repository.bookingr;
-import com.bus.bus.repository.busr;
 import com.bus.bus.repository.userr;
 
 @Service
@@ -23,14 +20,7 @@ public class admins {
     @Autowired
     private bookingr bkr;
     @Autowired
-    private busr br;
-    @Autowired
-    private ModelMapper modelMapper;
-
-    @Bean
-    public ModelMapper modelMapper() {
-        return new ModelMapper();
-    }
+    private PasswordEncoder passwordEncoder;
 
     
     /*public busm updatebus(int id, busm b) {
@@ -47,7 +37,7 @@ public class admins {
     }*/
 
     public List<bookingm> getBookingForbus(int busid) {
-       return bkr.findByBusid(busid);
+       return bkr.findByBus_Id(busid);
        
     }
 
@@ -58,9 +48,25 @@ public class admins {
     public userm updateadmin(int adminid, userm a) {
         Optional<userm> ex=ur.findById(adminid);
         if(ex.isPresent()){
-            userm u=ex.get();
-            modelMapper.map(a, u);
-            ur.save(u);
+            userm existingAdmin = ex.get();
+            
+            // Update only the allowed fields, preserve role and ID
+            if (a.getUsername() != null && !a.getUsername().trim().isEmpty()) {
+                existingAdmin.setUsername(a.getUsername());
+            }
+            if (a.getEmail() != null && !a.getEmail().trim().isEmpty()) {
+                existingAdmin.setEmail(a.getEmail());
+            }
+            if (a.getPhone() != null && !a.getPhone().trim().isEmpty()) {
+                existingAdmin.setPhone(a.getPhone());
+            }
+            if (a.getPassword() != null && !a.getPassword().trim().isEmpty()) {
+                existingAdmin.setPassword(passwordEncoder.encode(a.getPassword()));
+            }
+            // Don't update role or ID - keep existing values
+            
+            ur.save(existingAdmin);
+            return existingAdmin;
         }
         return null;
     }

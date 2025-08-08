@@ -28,11 +28,11 @@ public class busc {
     }
     @GetMapping("/bus/{busid}")
     public ResponseEntity<busm> getbusbyid(@PathVariable int busid){
-           Optional<busm> b = bs.getbusbyid(busid);
-           if(b.isEmpty()){
+           Optional<busm> busOptional = bs.getbusbyid(busid);
+           if(busOptional.isEmpty()){
                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
            }
-           return new ResponseEntity<>(b.get(), HttpStatus.OK);
+           return new ResponseEntity<>(busOptional.get(), HttpStatus.OK);
     }
     @PostMapping("/add")
     public ResponseEntity<busm> addbus(@RequestBody busm b){

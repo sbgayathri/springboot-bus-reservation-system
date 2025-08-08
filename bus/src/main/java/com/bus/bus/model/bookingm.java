@@ -3,6 +3,7 @@ package com.bus.bus.model;
 import java.time.LocalDateTime;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -20,11 +21,14 @@ public class bookingm {
     private int id;
     @JsonFormat(pattern = "dd-MM-yyyy  hh:mm a")
     private LocalDateTime bookingdate;
+    private int seatsBooked = 1; // Number of seats booked, default 1
     @ManyToOne
     @JoinColumn(name="user_id")
+    @JsonIgnoreProperties({"bookings", "password"})
     private userm users;
     @ManyToOne
     @JoinColumn(name="bus_id")
+    @JsonIgnoreProperties({"bookings", "admin"})
     private busm bus;
 
     // Manual getters and setters as fallback for Lombok
@@ -33,6 +37,9 @@ public class bookingm {
     
     public LocalDateTime getBookingdate() { return bookingdate; }
     public void setBookingdate(LocalDateTime bookingdate) { this.bookingdate = bookingdate; }
+    
+    public int getSeatsBooked() { return seatsBooked; }
+    public void setSeatsBooked(int seatsBooked) { this.seatsBooked = seatsBooked; }
     
     public userm getUsers() { return users; }
     public void setUsers(userm users) { this.users = users; }

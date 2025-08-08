@@ -29,19 +29,27 @@ public class bookings {
     
 
     public List<bookingm> getbookingbyuser(int userid) {
-         return br.findByUsersId(userid);
+         return  br.findByUsers_Id(userid);
     }
 
     public boolean cancel(int bookid) {
-       Optional<bookingm> b=br.findById(bookid);
-       if(b.isPresent()){
+       Optional<bookingm> bookingOpt = br.findById(bookid);
+       if(bookingOpt.isPresent()){
+        bookingm booking = bookingOpt.get();
+        busm bus = booking.getBus();
+        
+        // Restore the seats to the bus
+        bus.setAvailableseats(bus.getAvailableseats() + booking.getSeatsBooked());
+        bur.save(bus);
+        
+        // Delete the booking
         br.deleteById(bookid);
         return true;
        }
        return false;
     }
 
-    public ResponseEntity<String> bookbus(int busid, int userid) {
+    public ResponseEntity<String> bookbus(int busid, int userid, int seatsToBook) {
         Optional<busm> bo=bur.findById(busid);
         Optional<userm> u=ur.findById(userid);
         if(bo.isEmpty()){
@@ -53,7 +61,10 @@ public class bookings {
         busm bus=bo.get();
         
        if(bus.getAvailableseats()<=0){
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("not seats available");
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("No seats available");
+       }
+       if(bus.getAvailableseats()<seatsToBook){
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Not enough seats available. Only " + bus.getAvailableseats() + " seats left");
        }
        userm use=u.get();
 
@@ -61,11 +72,16 @@ public class bookings {
         book.setBus(bus);
         book.setUsers(use);
         book.setBookingdate(LocalDateTime.now());
+        book.setSeatsBooked(seatsToBook);
         br.save(book);
-        bus.setAvailableseats(bus.getAvailableseats()-1);
+        bus.setAvailableseats(bus.getAvailableseats()-seatsToBook);
         bur.save(bus);
-        return ResponseEntity.ok("Booking confirmed!");
+        return ResponseEntity.ok("Booking confirmed for " + seatsToBook + " seat(s)!");
 
+    }
+
+    public List<bookingm> getBookingsForBus(int busId) {
+        return br.findByBus_Id(busId);
     }
 
     
