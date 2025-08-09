@@ -27,9 +27,9 @@ public class busm {
     private String busnum;
     private String source;
     private String destination;
-    @JsonFormat(pattern="dd-MM-yyyy  hh:mm a")
+    @JsonFormat(pattern="yyyy-MM-dd'T'HH:mm")
     private LocalDateTime departuretime;
-    @JsonFormat(pattern="dd-MM-yyyy  hh:mm a")
+    @JsonFormat(pattern="yyyy-MM-dd'T'HH:mm")
     private LocalDateTime arrivaltime;
     private int totalseats;
     private int availableseats;

@@ -32,6 +32,18 @@ const AdminPanel = () => {
       const response = await adminService.getMyBuses(currentUser.id);
       const busesData = Array.isArray(response.data) ? response.data : [];
       console.log('Admin buses received:', busesData);
+      
+      // Debug: Check departure times
+      busesData.forEach((bus, index) => {
+        console.log(`Bus ${index + 1} (${bus.busnum}):`, {
+          id: bus.id,
+          departuretime: bus.departuretime,
+          arrivaltime: bus.arrivaltime,
+          departureType: typeof bus.departuretime,
+          arrivalType: typeof bus.arrivaltime
+        });
+      });
+      
       setMyBuses(busesData);
     } catch (err) {
       console.error('Error fetching admin buses:', err);
@@ -107,14 +119,71 @@ const AdminPanel = () => {
 
   const formatDate = (dateString) => {
     if (!dateString) return 'Not specified';
+    
     try {
-      const date = new Date(dateString);
-      if (isNaN(date.getTime())) {
-        return 'Invalid date';
+      // Handle different possible date formats
+      let date;
+      
+      // If it's already a Date object
+      if (dateString instanceof Date) {
+        date = dateString;
       }
-      return date.toLocaleString();
+      // If it's a string, try to parse it
+      else if (typeof dateString === 'string') {
+        // Check if it's an empty string or 'null'
+        if (dateString.trim() === '' || dateString.toLowerCase() === 'null') {
+          return 'Not specified';
+        }
+        
+        // Try parsing as ISO string first (from backend LocalDateTime)
+        date = new Date(dateString);
+        
+        // If that fails, try other formats
+        if (isNaN(date.getTime())) {
+          // Try parsing as timestamp
+          const timestamp = parseInt(dateString);
+          if (!isNaN(timestamp) && timestamp > 0) {
+            date = new Date(timestamp);
+          } else {
+            return 'Not specified';
+          }
+        }
+      }
+      // If it's a number (timestamp)
+      else if (typeof dateString === 'number') {
+        // Check for zero or negative timestamps (Unix epoch issue)
+        if (dateString <= 0) {
+          return 'Not specified';
+        }
+        date = new Date(dateString);
+      }
+      else {
+        return 'Not specified';
+      }
+      
+      // Check if the date is valid
+      if (isNaN(date.getTime())) {
+        return 'Not specified';
+      }
+      
+      // Check for Unix epoch year (1970) or unrealistic dates
+      const year = date.getFullYear();
+      if (year <= 1970 || year < 2000) {
+        return 'Not specified';
+      }
+      
+      // Format as: DD/MM/YYYY HH:MM AM/PM
+      return date.toLocaleString('en-IN', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: true
+      });
     } catch (error) {
-      return 'Invalid date';
+      console.error('Date formatting error:', error, 'for value:', dateString);
+      return 'Not specified';
     }
   };
 
@@ -211,7 +280,7 @@ const AdminPanel = () => {
                                   <tr>
                                     <th>Bus Number</th>
                                     <th>Route</th>
-                                    <th>Departure</th>
+                                    <th>Schedule</th>
                                     <th>Seats</th>
                                     <th>Action</th>
                                   </tr>
@@ -228,7 +297,24 @@ const AdminPanel = () => {
                                         {bus.source} → {bus.destination}
                                       </td>
                                       <td>
-                                        {formatDate(bus.departuretime)}
+                                        <div>
+                                          <strong>Departure:</strong><br />
+                                          <small className={formatDate(bus.departuretime) === 'Not specified' ? 'text-warning' : ''}>
+                                            {formatDate(bus.departuretime)}
+                                          </small>
+                                          {formatDate(bus.departuretime) === 'Not specified' && (
+                                            <small className="text-muted d-block">⚠️ Please update</small>
+                                          )}
+                                        </div>
+                                        <div className="mt-1">
+                                          <strong>Arrival:</strong><br />
+                                          <small className={formatDate(bus.arrivaltime) === 'Not specified' ? 'text-warning' : ''}>
+                                            {formatDate(bus.arrivaltime)}
+                                          </small>
+                                          {formatDate(bus.arrivaltime) === 'Not specified' && (
+                                            <small className="text-muted d-block">⚠️ Please update</small>
+                                          )}
+                                        </div>
                                       </td>
                                       <td>
                                         <Badge bg="success" className="me-1">

@@ -45,12 +45,31 @@ public class adminc {
             bus.setTotalseats((Integer) busData.get("totalseats"));
             bus.setAvailableseats((Integer) busData.get("availableseats"));
             
-            // Parse datetime strings
-            if (busData.get("departuretime") != null) {
-                bus.setDeparturetime(java.time.LocalDateTime.parse((String) busData.get("departuretime")));
+            // Parse datetime strings - handle null/empty cases
+            if (busData.get("departuretime") != null && !((String) busData.get("departuretime")).trim().isEmpty()) {
+                try {
+                    bus.setDeparturetime(java.time.LocalDateTime.parse((String) busData.get("departuretime")));
+                    System.out.println("✅ Departure time set: " + bus.getDeparturetime());
+                } catch (Exception e) {
+                    System.err.println("❌ Error parsing departure time: " + e.getMessage());
+                    bus.setDeparturetime(null);
+                }
+            } else {
+                System.out.println("⚠️ No departure time provided");
+                bus.setDeparturetime(null);
             }
-            if (busData.get("arrivaltime") != null) {
-                bus.setArrivaltime(java.time.LocalDateTime.parse((String) busData.get("arrivaltime")));
+            
+            if (busData.get("arrivaltime") != null && !((String) busData.get("arrivaltime")).trim().isEmpty()) {
+                try {
+                    bus.setArrivaltime(java.time.LocalDateTime.parse((String) busData.get("arrivaltime")));
+                    System.out.println("✅ Arrival time set: " + bus.getArrivaltime());
+                } catch (Exception e) {
+                    System.err.println("❌ Error parsing arrival time: " + e.getMessage());
+                    bus.setArrivaltime(null);
+                }
+            } else {
+                System.out.println("⚠️ No arrival time provided");
+                bus.setArrivaltime(null);
             }
             
             // Set admin relationship
