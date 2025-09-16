@@ -150,7 +150,7 @@ const BrowseBuses = () => {
                 <Row>
                   {filteredBuses.map((bus) => (
                     <Col md={6} lg={4} key={bus.id} className="mb-4">
-                      <Card className="h-100">
+                      <Card className="h-100 clickable-card" onClick={() => bus.availableseats > 0 && handleBookBus(bus)} style={{ cursor: bus.availableseats > 0 ? 'pointer' : 'not-allowed', boxShadow: '0 0 8px #eee' }}>
                         <Card.Header className="bg-secondary text-white">Bus #{bus.busnum}</Card.Header>
                         <Card.Body>
                           <h6>Route</h6>
@@ -172,7 +172,7 @@ const BrowseBuses = () => {
                             className="w-100"
                             type="button"
                             disabled={!bus.availableseats || bus.availableseats <= 0}
-                            onClick={() => handleBookBus(bus)}
+                            onClick={e => { e.stopPropagation(); handleBookBus(bus); }}
                           >
                             {(!bus.availableseats || bus.availableseats <= 0) ? 'No Seats Available' : 'Book Now'}
                           </Button>

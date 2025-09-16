@@ -1,4 +1,7 @@
+// ...existing code...
+// ...existing code...
 package com.bus.bus.controller;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.Optional;
 import java.util.Map;
@@ -24,6 +27,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 @RestController
 @RequestMapping("/api/auth")
 public class authenticate {
+    @GetMapping("/check-email")
+    public Map<String, Boolean> checkEmailExists(@RequestParam String email) {
+        boolean exists = repo.existsByEmail(email);
+        return java.util.Collections.singletonMap("exists", exists);
+    }
     @Autowired
     private AuthenticationManager authManager;
 
@@ -37,12 +45,11 @@ public class authenticate {
     private PasswordEncoder encoder;
 
     @PostMapping("/register")
-    public String register(@RequestBody userm user) {
+    public Map<String, Object> register(@RequestBody userm user) {
         Optional<userm> exist = repo.findByEmail(user.getEmail());
-        if (exist.isPresent()) return "User already exists";
+        if (exist.isPresent()) return Map.of("success", false, "message", "User already exists");
 
         user.setPassword(encoder.encode(user.getPassword()));
-        
         // Set role - use provided role or default to "USER"
         if (user.getRole() == null || user.getRole().isEmpty()) {
             user.setRole("USER");
@@ -55,9 +62,8 @@ public class authenticate {
                 user.setRole("USER"); // Default to USER for invalid roles
             }
         }
-        
         repo.save(user);
-        return "Registered successfully";
+        return Map.of("success", true, "message", "Registered successfully");
     }
 
     @PostMapping("/login")

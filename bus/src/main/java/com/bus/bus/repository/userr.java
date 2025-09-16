@@ -1,3 +1,4 @@
+
 package com.bus.bus.repository;
 
 import java.util.List;
@@ -13,4 +14,5 @@ public interface userr extends JpaRepository<userm,Integer>{
        List<userm> findByRole(String role);
        @Query("SELECT b.users FROM bookingm b WHERE b.bus.id=:busid")
        List<userm> finduserbybusid(int busid);
+       boolean existsByEmail(String email);
 }

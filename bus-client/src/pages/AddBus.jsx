@@ -16,6 +16,7 @@ const AddBus = () => {
   const [message, setMessage] = useState('');
   const [isError, setIsError] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [validationErrors, setValidationErrors] = useState({});
 
   const { currentUser } = useAuth();
   const navigate = useNavigate();
@@ -36,11 +37,62 @@ const AddBus = () => {
     return dateTimeString;
   };
 
+  const validateForm = () => {
+    const errors = {};
+    // Bus number: e.g., KA01AB1234
+    if (!/^([A-Z]{2}\d{2}[A-Z]{2}\d{4})$/.test(formData.busnum.trim())) {
+      errors.busnum = 'Bus number must be in format KA01AB1234.';
+    }
+    // Total seats
+    if (!formData.totalseats || isNaN(formData.totalseats) || formData.totalseats < 1 || formData.totalseats > 100) {
+      errors.totalseats = 'Total seats must be a number between 1 and 100.';
+    }
+    // Source and destination
+    if (!formData.source.trim()) {
+      errors.source = 'Source is required.';
+    }
+    if (!formData.destination.trim()) {
+      errors.destination = 'Destination is required.';
+    }
+    // Departure and arrival time
+    const now = new Date();
+    if (!formData.departuretime) {
+      errors.departuretime = 'Departure time is required.';
+    } else {
+      const dep = new Date(formData.departuretime);
+      if (dep < now) {
+        errors.departuretime = 'Departure time cannot be in the past.';
+      }
+    }
+    if (!formData.arrivaltime) {
+      errors.arrivaltime = 'Arrival time is required.';
+    } else {
+      const arr = new Date(formData.arrivaltime);
+      if (arr < now) {
+        errors.arrivaltime = 'Arrival time cannot be in the past.';
+      }
+    }
+    if (formData.departuretime && formData.arrivaltime) {
+      const dep = new Date(formData.departuretime);
+      const arr = new Date(formData.arrivaltime);
+      if (arr <= dep) {
+        errors.arrivaltime = 'Arrival time must be after departure time.';
+      }
+    }
+    setValidationErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
     setMessage('');
-
+    setIsError(false);
+    if (!validateForm()) {
+      setIsError(true);
+      setMessage('Please fix the validation errors.');
+      return;
+    }
+    setLoading(true);
     try {
       const busData = {
         ...formData,
@@ -50,12 +102,9 @@ const AddBus = () => {
         availableseats: parseInt(formData.totalseats),
         adminId: currentUser.id
       };
-
       await adminService.addBus(busData);
       setMessage('Bus added successfully!');
       setIsError(false);
-      
-      // Reset form
       setFormData({
         busnum: '',
         source: '',
@@ -64,12 +113,10 @@ const AddBus = () => {
         arrivaltime: '',
         totalseats: ''
       });
-
-      // Redirect to admin panel after 2 seconds
+      setValidationErrors({});
       setTimeout(() => {
         navigate('/admin/panel');
       }, 2000);
-
     } catch (error) {
       console.error('Error adding bus:', error);
       setMessage(error.response?.data?.message || error.message || 'Failed to add bus. Please try again.');
@@ -114,7 +161,11 @@ const AddBus = () => {
                     onChange={handleChange}
                     required
                     placeholder="e.g., KA01AB1234"
+                    isInvalid={!!validationErrors.busnum}
                   />
+                  <Form.Control.Feedback type="invalid">
+                    {validationErrors.busnum}
+                  </Form.Control.Feedback>
                 </Form.Group>
               </div>
               <div className="col-md-6">
@@ -129,7 +180,11 @@ const AddBus = () => {
                     min="1"
                     max="100"
                     placeholder="e.g., 40"
+                    isInvalid={!!validationErrors.totalseats}
                   />
+                  <Form.Control.Feedback type="invalid">
+                    {validationErrors.totalseats}
+                  </Form.Control.Feedback>
                 </Form.Group>
               </div>
             </div>
@@ -145,7 +200,11 @@ const AddBus = () => {
                     onChange={handleChange}
                     required
                     placeholder="e.g., Bangalore"
+                    isInvalid={!!validationErrors.source}
                   />
+                  <Form.Control.Feedback type="invalid">
+                    {validationErrors.source}
+                  </Form.Control.Feedback>
                 </Form.Group>
               </div>
               <div className="col-md-6">
@@ -158,7 +217,11 @@ const AddBus = () => {
                     onChange={handleChange}
                     required
                     placeholder="e.g., Mysore"
+                    isInvalid={!!validationErrors.destination}
                   />
+                  <Form.Control.Feedback type="invalid">
+                    {validationErrors.destination}
+                  </Form.Control.Feedback>
                 </Form.Group>
               </div>
             </div>
@@ -173,7 +236,12 @@ const AddBus = () => {
                     value={formData.departuretime}
                     onChange={handleChange}
                     required
+                    isInvalid={!!validationErrors.departuretime}
+                    min={new Date().toISOString().slice(0,16)}
                   />
+                  <Form.Control.Feedback type="invalid">
+                    {validationErrors.departuretime}
+                  </Form.Control.Feedback>
                 </Form.Group>
               </div>
               <div className="col-md-6">
@@ -185,7 +253,12 @@ const AddBus = () => {
                     value={formData.arrivaltime}
                     onChange={handleChange}
                     required
+                    isInvalid={!!validationErrors.arrivaltime}
+                    min={new Date().toISOString().slice(0,16)}
                   />
+                  <Form.Control.Feedback type="invalid">
+                    {validationErrors.arrivaltime}
+                  </Form.Control.Feedback>
                 </Form.Group>
               </div>
             </div>

@@ -16,22 +16,25 @@ const MyBookings = ({ bookings, loading, error, success, onRefresh }) => {
   // Helper function to format date safely
   const formatDate = (dateString) => {
     if (!dateString) return 'Not specified';
-    try {
-      const date = new Date(dateString);
-      if (isNaN(date.getTime())) {
-        return 'Invalid date';
-      }
-      return date.toLocaleString('en-IN', {
-        day: '2-digit',
-        month: '2-digit', 
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-        hour12: true
-      });
-    } catch (error) {
+    // Try to parse ISO or other formats
+    let date = new Date(dateString);
+    if (isNaN(date.getTime())) {
+      // Try to fix common backend formatting issues
+      // e.g., replace space with T, remove milliseconds
+      const fixed = dateString.replace(' ', 'T').split('.')[0];
+      date = new Date(fixed);
+    }
+    if (isNaN(date.getTime())) {
       return 'Invalid date';
     }
+    return date.toLocaleString('en-IN', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: true
+    });
   };
 
   const handleCancelBooking = async () => {
@@ -88,7 +91,7 @@ const MyBookings = ({ bookings, loading, error, success, onRefresh }) => {
               <th>Departure Time</th>
               <th>Arrival Time</th>
               <th>Seats Booked</th>
-              <th>Booking Date</th>
+              <th>Booking Date & Time</th>
               <th>Actions</th>
             </tr>
           </thead>

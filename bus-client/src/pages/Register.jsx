@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Container, Card, Form, Button, Alert } from 'react-bootstrap';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { api } from '../services/api';
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -31,6 +32,7 @@ const Register = () => {
     setLoading(true);
     setMessage('');
 
+
     // Validation
     if (formData.password !== formData.confirmPassword) {
       setMessage('Passwords do not match');
@@ -44,6 +46,28 @@ const Register = () => {
       setIsError(true);
       setLoading(false);
       return;
+    }
+
+
+    // Phone number validation (10 digits)
+    if (!/^\d{10}$/.test(formData.phone)) {
+      setMessage('Phone number must be exactly 10 digits');
+      setIsError(true);
+      setLoading(false);
+      return;
+    }
+
+    // Check if email already exists (frontend call)
+    try {
+      const res = await api.get(`/auth/check-email?email=${encodeURIComponent(formData.email)}`);
+      if (res.data.exists) {
+  setMessage('User already exists');
+        setIsError(true);
+        setLoading(false);
+        return;
+      }
+    } catch (err) {
+      // If endpoint does not exist, skip this check
     }
 
     // Prepare data for backend
@@ -121,6 +145,7 @@ const Register = () => {
                     onChange={handleChange}
                     required
                     placeholder="Enter your phone number"
+                    maxLength={10}
                   />
                 </Form.Group>
 

@@ -148,26 +148,25 @@ export const AuthProvider = ({ children }) => {
     try {
       console.log('📝 Attempting registration for:', userData.email);
       const response = await api.post('/auth/register', userData);
-      
-      // Check if response has error property
-      if (response.data.error) {
-        console.log('❌ Registration failed:', response.data.error);
-        return { 
-          success: false, 
-          message: response.data.error 
+
+      if (response.data.success === false) {
+        console.log('❌ Registration failed:', response.data.message);
+        return {
+          success: false,
+          message: response.data.message
         };
       }
-      
+
       console.log('✅ Registration successful');
-      return { 
-        success: true, 
-        message: response.data || 'Registration successful' 
+      return {
+        success: true,
+        message: response.data.message || 'Registration successful'
       };
     } catch (error) {
       console.error('❌ Registration error:', error);
-      return { 
-        success: false, 
-        message: error.response?.data?.message || error.response?.data?.error || 'Registration failed' 
+      return {
+        success: false,
+        message: error.response?.data?.message || error.response?.data?.error || 'Registration failed'
       };
     }
   };

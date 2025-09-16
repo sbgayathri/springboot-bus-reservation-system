@@ -19,7 +19,7 @@ public class bookingm {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
-    @JsonFormat(pattern = "dd-MM-yyyy  hh:mm a")
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime bookingdate;
     private int seatsBooked = 1; // Number of seats booked, default 1
     @ManyToOne
